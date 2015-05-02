@@ -15,6 +15,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 function wifi_controller()
 {
     global $session,$route;
+    if (!$session['write']) return array('content'=>false);
     
     require "wifi.php";
     $wifi = new Wifi();
