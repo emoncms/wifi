@@ -5,7 +5,7 @@
     <br><br>
     <div id="networks"></div>
 
-    <button id="wifi_save" class="btn">Connect</button>
+    <button id="wifi_save" class="btn">Save and connect</button>
      ...then hit Refersh
     <hr>
 
@@ -38,6 +38,9 @@
 <script>
 
     var networks = wifi_getconfig();
+    for (z in networks) {
+        networks[z].enabled = true;
+    }
     draw_network_list();
     wifi_scan();
     wifi_info();
@@ -67,7 +70,10 @@
         for (z in networks)
         {
             var psk = $(".psk[ssid='"+z+"']").val();
+            var enabled = $(".enabled[ssid='"+z+"']")[0].checked;
             networks[z]["PSK"] = psk;
+            
+            if (!enabled) delete networks[z];
         }
     
         $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks), dataType: 'json', async: true, 
@@ -121,7 +127,10 @@
         $.ajax({url: "wifi/scan.json", dataType: 'json', async: true, 
             success: function(data) {
                 for (z in data) {
-                    networks[z] = data[z];
+                    if (networks[z]==undefined) networks[z] = {};
+                    for (key in data[z]) {
+                        networks[z][key] = data[z][key];
+                    }
                 }
                 draw_network_list();
             }
@@ -143,28 +152,35 @@
         var out = "";
         for (z in networks)
         {
-            var psk = $(".psk[ssid='"+z+"']").val();
-            networks[z]["PSK"] = psk;
-            
             if (networks[z]['SIGNAL']!=0) {
                 out += "<tr class='success'>";
+                out += "<td><input class='enabled' ssid='"+z+"' type='checkbox'/ ></td>";
                 out += "<td><b>SSID</b></td>";
                 out += "<td>"+z+" (Security: "+networks[z]['SECURITY']+")</td>";
                 out += "<td>- "+networks[z]['SIGNAL']+" dBm</td>";
-                out += "<tr class='success'><td><b>PSK</b></td>";
+                out += "<tr class='success'><td></td><td><b>PSK</b></td>";
             } else {
                 out += "<tr>";
+                out += "<td><input class='enabled' ssid='"+z+"' type='checkbox'/ ></td>";
                 out += "<td><b>SSID</b></td>";
                 out += "<td>"+z+"</td>";
                 out += "<td><i>---</i></td>";
-                out += "<tr><td><b>PSK</b></td>";
+                out += "<tr><td></td><td><b>PSK</b></td>";
             }
-            out += "<td><input class='psk' ssid='"+z+"' type='password' value='";
+            
+            out +=
+             "<td><input class='psk' ssid='"+z+"' type='password' value='";
             if (networks[z]['PSK']!=undefined) out += networks[z]['PSK'];
             out += "'/ > <i ssid='"+z+"' class='showpsk icon-eye-open' style='cursor:pointer'></i></td><td></td></tr>";
             out += "</tr>";
         }
         $("#networks").html("<table class='table'>"+out+"</table>");
+        
+        for (z in networks) {
+            if (networks[z].enabled) {
+                $(".enabled[ssid="+z+"]")[0].checked = true
+            }
+        }
     }
 </script>
 
