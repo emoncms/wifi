@@ -67,17 +67,20 @@
     });
     
     $("#wifi_save").click(function(){
+
+        var networks_to_save = {};
     
         for (z in networks)
         {
             var psk = $(".psk[ssid='"+z+"']").val();
             var enabled = $(".enabled[ssid='"+z+"']")[0].checked;
             networks[z]["PSK"] = psk;
+            networks[z].enabled = enabled;
             
-            if (!enabled) delete networks[z];
+            if (enabled) networks_to_save[z] = networks[z];
         }
     
-        $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks), dataType: 'json', async: true, 
+        $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks_to_save), dataType: 'json', async: true, 
             success: function(data) {
                 $("#info").html(JSON.stringify(data));
                 wifi_info();
