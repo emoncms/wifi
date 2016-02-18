@@ -44,6 +44,7 @@
     draw_network_list();
     wifi_scan();
     wifi_info();
+    setInterval(wifi_info,5000);
 
     $("#wifi_start").click(function(){    
         $.ajax({ type: 'POST', url: "wifi/start.json" });
@@ -79,6 +80,7 @@
         $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks), dataType: 'json', async: true, 
             success: function(data) {
                 $("#info").html(JSON.stringify(data));
+                wifi_info();
             }
         });
     });   
