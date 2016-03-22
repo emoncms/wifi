@@ -37,6 +37,7 @@ function wifi_controller()
     
     if ($route->action=="setconfig") {
         $result = $wifi->setconfig(json_decode($_POST['networks']));
+        $route->format = "text";
     }
     
     return array('content'=>$result);
