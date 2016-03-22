@@ -1,5 +1,6 @@
 <?php
 
+
 class Wifi
 {
 	public function start()
@@ -40,11 +41,11 @@ class Wifi
 		        $ssid = $arrNetwork[4];
 		        $networks[$ssid] = array(
 		            "BSSID"=>$arrNetwork[0],
-		            "CHANNEL"=>$arrNetwork[1], 
+		            "CHANNEL"=>$arrNetwork[1],
 		            "SIGNAL"=>$arrNetwork[2],
 		            "SECURITY"=>substr($arrNetwork[3],1,-1)
 		        );
-		    }   
+		    }
 	    }
 	    return $networks;
     }
@@ -68,7 +69,7 @@ class Wifi
 		if (isset($result[1])) $wlan['RxPackets'] = $result[1];
 		preg_match('/TX packets:(\d+)/',$strWlan0,$result);
 		if (isset($result[1])) $wlan['TxPackets'] = $result[1];
-		preg_match('/RX Bytes:(\d+ \(\d+.\d+ MiB\))/i',$strWlan0,$result);
+		preg_match('/RX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['RxBytes'] = $result[1];
 		preg_match('/TX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['TxBytes'] = $result[1];
@@ -85,7 +86,7 @@ class Wifi
 		preg_match('/Signal Level=([0-9]+\/[0-9]+)/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['SignalLevel'] = $result[1];
 		
-		if(strpos($strWlan0, "ESSID") !== false ) $wlan['status'] = "connected"; else $wlan['status'] = "disconnected"; 
+		if ( (strpos($strWlan0, "ESSID") !== false) && (isset($wlan['SSID'])) ) $wlan['status'] = "connected"; else $wlan['status'] = "disconnected";
 		
 		
 		return $wlan;
@@ -118,7 +119,7 @@ class Wifi
     }
     
     public function setconfig($networks)
-    {    
+    {
 	    $config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\n\n";
 
         foreach ($networks as $ssid=>$network)
@@ -126,7 +127,7 @@ class Wifi
 		    $ssid = escapeshellarg($ssid);
 		    
 		    $psk = "";
-		    if (isset($network->PSK) && $network->PSK!="") 
+		    if (isset($network->PSK) && $network->PSK!="")
 		    {
 		        $psk = escapeshellarg($network->PSK);
 		        $result = "";
@@ -151,3 +152,4 @@ class Wifi
 	    return $config;
 	}
 }
+

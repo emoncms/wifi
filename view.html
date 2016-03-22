@@ -81,9 +81,10 @@
             if (enabled) networks_to_save[z] = networks[z];
         }
     
-        $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks_to_save), dataType: 'json', async: true,
+        $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks_to_save), dataType: 'text', async: true,
             success: function(data) {
-                $("#info").html(JSON.stringify(data));
+                console.log("wifi/setconfig.json:");
+                console.log(data);
                 wifi_info();
             }
         });
