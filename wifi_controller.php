@@ -14,31 +14,41 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function wifi_controller()
 {
-    global $session,$route;
-    if (!$session['write']) return array('content'=>false);
-    
+    global $session, $route;
+    if (!$session['write']) {
+        return ['content' => false];
+    }
+
     require "wifi.php";
     $wifi = new Wifi();
 
-    if ($route->action=="") $result = view("Modules/wifi/view.html", array());
-    
-    // wifi/scan
-    if ($route->action=="scan") $result = $wifi->scan();
-    
-    // wifi/info
-    if ($route->action=="info") $result = $wifi->info();    
-    
-    // wifi/start stop restart
-    if ($route->action=="start") $result = $wifi->start();
-    if ($route->action=="stop") $result = $wifi->stop();
-    if ($route->action=="restart") $result = $wifi->restart();
-    
-    if ($route->action=="getconfig") $result = $wifi->getconfig();
-    
-    if ($route->action=="setconfig") {
-        $result = $wifi->setconfig(json_decode($_POST['networks']));
-        $route->format = "text";
+    switch ($route->action) {
+        case 'scan':
+            $result = $wifi->scan();
+            break;
+        case 'info':
+            $result = $wifi->info();
+            break;
+        case 'start':
+            $result = $wifi->start();
+            break;
+        case 'stop':
+            $result = $wifi->stop();
+            break;
+        case 'restart':
+            $result = $wifi->restart();
+            break;
+        case 'getconfig':
+            $result = $wifi->getconfig();
+            break;
+        case 'setconfig':
+            $result = $wifi->setconfig(json_decode($_POST['networks']));
+            $route->format = "text";
+            break;
+        default:
+            $result = view("Modules/wifi/view.html", []);
+            break;
     }
-    
-    return array('content'=>$result);
+
+    return ['content' => $result];
 }
