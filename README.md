@@ -6,7 +6,7 @@ Wifi configuration module for emoncms. Installed on emonPi pre-built SD card ima
 
 # Install 
 ```
-  cd /var/www/emoncms/Module
+  cd /var/www/emoncms/Modules
   git clone https://github.com/emoncms/wifi
   ```
   
