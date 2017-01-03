@@ -74,7 +74,9 @@
         for (z in networks)
         {
             var psk = $(".psk[ssid='"+z+"']").val();
-            var enabled = $(".enabled[ssid='"+z+"']")[0].checked;
+            var enabled = false;
+            if ($(".enabled[ssid='"+z+"']")[0]!=undefined)
+                enabled = $(".enabled[ssid='"+z+"']")[0].checked;
             networks[z]["PSK"] = psk;
             networks[z].enabled = enabled;
             
