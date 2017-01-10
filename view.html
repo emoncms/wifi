@@ -86,6 +86,7 @@
         $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks_to_save), dataType: 'text', async: true,
             success: function(data) {
                 console.log("wifi/setconfig.json:");
+                alert("Config saved");
                 console.log(data);
                 wifi_info();
             }
