@@ -155,7 +155,7 @@ class Wifi
 	    // system('sudo cp /tmp/wifidata /home/pi/data/wpa_supplicant.conf',$returnval);
 
             if (file_exists("/home/pi/data/wifiAP-enabled")) {
-                exec("/home/pi/emonpi/wifiAP/stopAP.sh");
+                exec("sudo /home/pi/emonpi/wifiAP/stopAP.sh");
             }
 
 	    $this->restart();
