@@ -5,7 +5,7 @@
     
     <br><br>
     <b>Select one or more available WiFi networks:</b>
-    <div id="networks"></div>
+    <div id="networks"><div class="alert-info">Scanning for networks...</div></div>
 
     <button id="wifi_save" class="btn btn-warning">Save and connect</button>
      ...then click 'Refresh'
@@ -36,6 +36,9 @@
             </td>
         </tr>
         </table>
+        
+   <h3>Network Log</h3>
+   <pre id="update-log-bound"><div id="update-log"></div></pre>
 
 <script>
 
@@ -47,6 +50,7 @@
     wifi_scan();
     wifi_info();
     setInterval(wifi_info,5000);
+    setInterval(getlog,5000);
 
     $("#wifi_start").click(function(){
         $.ajax({ type: 'POST', url: "wifi/start.json" });
@@ -193,6 +197,15 @@
                 $(".enabled[ssid='"+z+"']")[0].checked = true
             }
         }
+    }
+    
+    function getlog() {
+      $.ajax({ url: "wifi/log", async: true, dataType: "text", success: function(result)
+        {
+          $("#update-log").html(result);
+          $("#update-log-bound").scrollTop = $("#update-log-bound").scrollHeight;
+        }
+      });
     }
 </script>
 
