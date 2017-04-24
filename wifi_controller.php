@@ -18,6 +18,8 @@ function wifi_controller()
     if (!$session['write']) {
         return ['content' => false];
     }
+    
+    $route->format = "json";
 
     require "wifi.php";
     $wifi = new Wifi();
@@ -38,15 +40,19 @@ function wifi_controller()
         case 'restart':
             $result = $wifi->restart();
             break;
+        case 'log':
+            $route->format = "text";
+            $result = $wifi->wifilog();
+            break;
         case 'getconfig':
             $result = $wifi->getconfig();
             break;
         case 'setconfig':
             $result = $wifi->setconfig(json_decode($_POST['networks']));
-            $route->format = "text";
             break;
         default:
             $result = view("Modules/wifi/view.html", []);
+            $route->format = "html";
             break;
     }
 

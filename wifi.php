@@ -22,6 +22,13 @@ class Wifi
 		return "wlan0 restarted";
 	}
 	
+	public function wifilog()
+	{
+	    exec('sudo /home/pi/emonpi/wifiAP/networklog.sh',$out);
+	    $result = ""; foreach($out as $line) $result .= $line."\n";
+	    return $result;
+	}
+	
     public function scan()
     {
 	    $return = '';
