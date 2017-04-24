@@ -15,46 +15,46 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 function wifi_controller()
 {
     global $session, $route;
-    if (!$session['write']) {
-        return ['content' => false];
-    }
     
     $route->format = "json";
 
     require "wifi.php";
     $wifi = new Wifi();
 
-    switch ($route->action) {
-        case 'scan':
-            $result = $wifi->scan();
-            break;
-        case 'info':
-            $result = $wifi->info();
-            break;
-        case 'start':
-            $result = $wifi->start();
-            break;
-        case 'stop':
-            $result = $wifi->stop();
-            break;
-        case 'restart':
-            $result = $wifi->restart();
-            break;
-        case 'log':
-            $route->format = "text";
-            $result = $wifi->wifilog();
-            break;
-        case 'getconfig':
-            $result = $wifi->getconfig();
-            break;
-        case 'setconfig':
+    if ($session["write"]) {
+        // Write level access
+        if ($route->action=="start") $result = $wifi->start();
+        if ($route->action=="stop") $result = $wifi->stop();
+        if ($route->action=="restart") $result = $wifi->restart();
+        
+        if ($route->action=="setconfig") {
             $result = $wifi->setconfig(json_decode($_POST['networks']));
-            break;
-        default:
-            $result = view("Modules/wifi/view.html", []);
+        }
+        
+        if ($route->action=="") {
             $route->format = "html";
-            break;
+            $result = view("Modules/wifi/view.html",array());
+        }
+        
+    } else if ($session["read"]) {
+        // Read level access
+        if ($route->action=="info") {
+            $result = $wifi->info();
+        }
+        
+        if ($route->action=="getconfig") {
+            $result = $wifi->getconfig();
+        }
+        
+        if ($route->action=="log") {
+            $route->format = "text";
+            $result = $wifi->log();  
+        }
+        
+    } else {
+        // Public access
+        if ($route->action=="scan") $result = $wifi->scan();
     }
 
-    return ['content' => $result];
+    return array('content' => $result);
 }
