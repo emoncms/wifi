@@ -20,24 +20,29 @@ function wifi_controller()
 
     require "wifi.php";
     $wifi = new Wifi();
+    
+    $result = false;
 
+    // ------------------------------------------------------------
+    // Write level access
+    // ------------------------------------------------------------
     if ($session["write"]) {
-        // Write level access
+        
         if ($route->action=="start") $result = $wifi->start();
         if ($route->action=="stop") $result = $wifi->stop();
         if ($route->action=="restart") $result = $wifi->restart();
-        
-        if ($route->action=="setconfig") {
-            $result = $wifi->setconfig(json_decode($_POST['networks']));
-        }
         
         if ($route->action=="") {
             $route->format = "html";
             $result = view("Modules/wifi/view.html",array());
         }
-        
-    } else if ($session["read"]) {
-        // Read level access
+    }
+     
+    // ------------------------------------------------------------
+    // Read level access
+    // ------------------------------------------------------------   
+    if ($session["read"]) {
+    
         if ($route->action=="info") {
             $result = $wifi->info();
         }
@@ -48,12 +53,17 @@ function wifi_controller()
         
         if ($route->action=="log") {
             $route->format = "text";
-            $result = $wifi->log();  
-        }
-        
-    } else {
-        // Public access
-        if ($route->action=="scan") $result = $wifi->scan();
+            $result = $wifi->wifilog();  
+        } 
+    }
+    
+    // ------------------------------------------------------------
+    // Public
+    // ------------------------------------------------------------
+    if ($route->action=="scan") $result = $wifi->scan();
+    
+    if ($route->action=="setconfig") {
+        $result = $wifi->setconfig(json_decode($_POST['networks']));
     }
 
     return array('content' => $result);
