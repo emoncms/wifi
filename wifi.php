@@ -24,9 +24,13 @@ class Wifi
 	
 	public function wifilog()
 	{
-	    exec('sudo /home/pi/emonpi/wifiAP/networklog.sh',$out);
-	    $result = ""; foreach($out as $line) $result .= $line."\n";
-	    return $result;
+            if (file_exists("/home/pi/emonpi/wifiAP/networklog.sh"))
+            {
+ 	      exec('sudo /home/pi/emonpi/wifiAP/networklog.sh',$out);
+	      $result = ""; foreach($out as $line) $result .= $line."\n";
+	      return $result;
+            }
+            return "Error: Cannot find ~/emonpi/wifiap/networklog.sh, please update emonPi";
 	}
 	
     public function scan()
