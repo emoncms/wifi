@@ -22,6 +22,17 @@ class Wifi
 		return "wlan0 restarted";
 	}
 	
+	public function wifilog()
+	{
+            if (file_exists("/home/pi/emonpi/wifiAP/networklog.sh"))
+            {
+ 	      exec('sudo /home/pi/emonpi/wifiAP/networklog.sh',$out);
+	      $result = ""; foreach($out as $line) $result .= $line."\n";
+	      return $result;
+            }
+            return "Error: Cannot find ~/emonpi/wifiap/networklog.sh";
+	}
+	
     public function scan()
     {
 	    $return = '';
@@ -146,6 +157,11 @@ class Wifi
 	    exec("echo '$config' > /tmp/wifidata",$return);
 	    system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
 	    // system('sudo cp /tmp/wifidata /home/pi/data/wpa_supplicant.conf',$returnval);
+
+      if (file_exists("/home/pi/data/wifiAP-enabled")) {
+          exec("sudo /home/pi/emonpi/wifiAP/stopAP.sh");
+      }
+
 	    $this->restart();
 	    
 	    return $config;
