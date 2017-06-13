@@ -30,7 +30,7 @@ class Wifi
 	      $result = ""; foreach($out as $line) $result .= $line."\n";
 	      return $result;
             }
-            return "Error: Cannot find ~/emonpi/wifiap/networklog.sh, please update emonPi";
+            return "Error: Cannot find ~/emonpi/wifiap/networklog.sh";
 	}
 	
     public function scan()
