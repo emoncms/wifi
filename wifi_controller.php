@@ -22,6 +22,10 @@ function wifi_controller()
     $wifi = new Wifi();
     
     $result = false;
+    
+    // Special setup access to WIFI function scan and setconfig
+    $setup_access = false;
+    if (isset($_SESSION['setup_access']) && $_SESSION['setup_access']) $setup_access = true;
 
     // ------------------------------------------------------------
     // Write level access
@@ -57,13 +61,14 @@ function wifi_controller()
         } 
     }
     
-    // ------------------------------------------------------------
-    // Public
-    // ------------------------------------------------------------
-    if ($route->action=="scan") $result = $wifi->scan();
+    if ($session["read"] || $setup_access) {
+        if ($route->action=="scan") $result = $wifi->scan();
+    }
     
-    if ($route->action=="setconfig") {
-        $result = $wifi->setconfig(json_decode($_POST['networks']));
+    if ($session["write"] || $setup_access) {
+        if ($route->action=="setconfig") {
+            $result = $wifi->setconfig(json_decode($_POST['networks']));
+        }
     }
 
     return array('content' => $result);
