@@ -73,7 +73,7 @@
     });
     
     $("#wifi_save").click(function(){
-        alert("Saving config, click OK");
+        alert("Saving config, trying to connect...please wait 60s");
 
         var networks_to_save = {};
     
@@ -92,7 +92,7 @@
         $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks_to_save), dataType: 'text', async: true,
             success: function(data) {
                 console.log("wifi/setconfig.json:");
-                alert("Config saved");
+                alert("Config saved, check connection status below");
                 console.log(data);
                 wifi_info();
             }
