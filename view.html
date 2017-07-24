@@ -1,19 +1,20 @@
-    <h2>Wifi Config</h2>
+    <h2>WiFi Config</h2>
     <br>
-    <button id="wifi_scan" class="btn">Scan</button>
+    <p>Connect emonPi / emonBase to local WiFi network.</p>
+    <button id="wifi_scan" class="btn btn-info">Scan</button>
     
     <br><br>
     <b>Select one or more available WiFi networks:</b>
-    <div id="networks"></div>
+    <div id="networks"><div class="alert-info">Scanning for networks...</div></div>
 
-    <button id="wifi_save" class="btn">Save and connect</button>
-     ...then hit Refersh
+    <button id="wifi_save" class="btn btn-warning">Save and connect</button>
+     ...then click 'Refresh'
     <hr>
 
-    <button id="wifi_info" class="btn" style="float:right">Refresh</button>
-    <button id="wifi_restart" class="btn" style="float:right">Restart</button>
-    <button id="wifi_stop" class="btn" style="float:right">Stop</button>
-    <button id="wifi_start" class="btn" style="float:right">Start</button>
+    <button id="wifi_info" class="btn btn-info" style="float:right">Refresh</button>
+    <button id="wifi_restart" class="btn btn-info" style="float:right">Restart</button>
+    <button id="wifi_stop" class="btn btn-info" style="float:right">Stop</button>
+    <button id="wifi_start" class="btn btn-info" style="float:right">Start</button>
     <h3>Connection Info</h3>
         <table class="table">
         <tr>
@@ -35,6 +36,9 @@
             </td>
         </tr>
         </table>
+        
+   <h3>Network Log</h3>
+   <pre id="update-log-bound"><div id="update-log"></div></pre>
 
 <script>
 
@@ -46,6 +50,7 @@
     wifi_scan();
     wifi_info();
     setInterval(wifi_info,5000);
+    setInterval(getlog,5000);
 
     $("#wifi_start").click(function(){
         $.ajax({ type: 'POST', url: "wifi/start.json" });
@@ -68,13 +73,16 @@
     });
     
     $("#wifi_save").click(function(){
+        alert("Saving config, trying to connect...please wait 60s");
 
         var networks_to_save = {};
     
         for (z in networks)
         {
             var psk = $(".psk[ssid='"+z+"']").val();
-            var enabled = $(".enabled[ssid='"+z+"']")[0].checked;
+            var enabled = false;
+            if ($(".enabled[ssid='"+z+"']")[0]!=undefined)
+                enabled = $(".enabled[ssid='"+z+"']")[0].checked;
             networks[z]["PSK"] = psk;
             networks[z].enabled = enabled;
             
@@ -84,6 +92,7 @@
         $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks_to_save), dataType: 'text', async: true,
             success: function(data) {
                 console.log("wifi/setconfig.json:");
+                alert("Config saved, check connection status below");
                 console.log(data);
                 wifi_info();
             }
@@ -163,7 +172,7 @@
                 out += "<tr class='success'>";
                 out += "<td><input class='enabled' ssid='"+z+"' type='checkbox'/ ></td>";
                 out += "<td><b>SSID</b></td>";
-                out += "<td>"+z+" (Security: "+networks[z]['SECURITY']+")</td>";
+                out += "<td>"+z+" (Security: ["+networks[z]['SECURITY']+"])</td>";
                 out += "<td>- "+networks[z]['SIGNAL']+" dBm</td>";
                 out += "<tr class='success'><td></td><td><b>PSK</b></td>";
             } else {
@@ -188,6 +197,15 @@
                 $(".enabled[ssid='"+z+"']")[0].checked = true
             }
         }
+    }
+    
+    function getlog() {
+      $.ajax({ url: "wifi/log", async: true, dataType: "text", success: function(result)
+        {
+          $("#update-log").html(result);
+          $("#update-log-bound").scrollTop = $("#update-log-bound").scrollHeight;
+        }
+      });
     }
 </script>
 

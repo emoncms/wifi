@@ -1,3 +1,4 @@
 <?php
 
-    $menu_right[] = array('name'=> dgettext($domain, "Wifi"), 'path'=>"wifi" , 'session'=>"write");
+    $menu_dropdown_config[] = array('name'=> dgettext($domain, "WiFi"), 'icon'=>'icon-signal', 'path'=>"wifi" , 'session'=>"write", 'order' => 1, 'divider'=>false );
+
