@@ -90,8 +90,8 @@ class Wifi
 		preg_match('/TX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['TxBytes'] = $result[1];
 		
-		// New ifconfig (strech)
-		preg_match('/inet6 ([0-9a-f:]+)/i',$strWlan0,$result);
+		// New ifconfig (strechh)
+	        preg_match('/inet ([0-9.]+)/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['IPAddress'] = $result[1];
 		preg_match('/netmask ([0-9.]+)/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
