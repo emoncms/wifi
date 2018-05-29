@@ -70,6 +70,11 @@ class Wifi
 		$strWlan0 = preg_replace('/\s\s+/', ' ', $strWlan0);
 		
 		$wlan = array();
+		
+		$wlan['RxBytes'] = ""; 
+		$wlan['TxBytes'] = "";
+		
+		// Older ifconfig
 		preg_match('/HWaddr ([0-9a-f:]+)/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['MacAddress'] = $result[1];
 		preg_match('/inet addr:([0-9.]+)/i',$strWlan0,$result);
@@ -84,11 +89,24 @@ class Wifi
 		if (isset($result[1])) $wlan['RxBytes'] = $result[1];
 		preg_match('/TX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['TxBytes'] = $result[1];
+		
+		// New ifconfig (strechh)
+	        preg_match('/inet ([0-9.]+)/i',$strWlan0,$result);
+		if (isset($result[1])) $wlan['IPAddress'] = $result[1];
+		preg_match('/netmask ([0-9.]+)/i',$strWlan0,$result);
+		if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
+		preg_match('/RX packets (\d+)/',$strWlan0,$result);
+		if (isset($result[1])) $wlan['RxPackets'] = $result[1];
+		preg_match('/TX packets (\d+)/',$strWlan0,$result);
+		if (isset($result[1])) $wlan['TxPackets'] = $result[1];
+
 		preg_match('/ESSID:\"([a-zA-Z0-9_\-\s]+)\"/i',$strWlan0,$result); //Added some additional charicters here
 		if (isset($result[1])) $wlan['SSID'] = str_replace('"','',$result[1]);
 		preg_match('/Access Point: ([0-9a-f:]+)/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['BSSID'] = $result[1];
 		preg_match('/Bit Rate:([0-9]+ Mb\/s)/i',$strWlan0,$result);
+		if (isset($result[1])) $wlan['Bitrate'] = $result[1];
+		
 		preg_match('/Bit Rate=([0-9]+ Mb\/s)/i',$strWlan0,$result); //Added alternative Bit Rate measure
 		if (isset($result[1])) $wlan['Bitrate'] = $result[1];
 		preg_match('/Frequency:(\d+\.\d+ GHz)/i',$strWlan0,$result); //escaped the full stop here
