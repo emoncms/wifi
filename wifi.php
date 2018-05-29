@@ -92,8 +92,6 @@ class Wifi
 		
 		// New ifconfig (strech)
 		preg_match('/inet6 ([0-9a-f:]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['MacAddress'] = $result[1];
-		preg_match('/inet ([0-9.]+)/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['IPAddress'] = $result[1];
 		preg_match('/netmask ([0-9.]+)/i',$strWlan0,$result);
 		if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
