@@ -37,9 +37,9 @@ class Wifi
     {
 	    $return = '';
 	    exec('sudo ifup wlan0',$return);
-	    exec('sudo wpa_cli scan',$return);
+	    exec('sudo wpa_cli -i wlan0 scan',$return);
 	    sleep(2);
-	    exec('sudo wpa_cli scan_results',$return);
+	    exec('sudo wpa_cli -i wlan0 scan_results',$return);
 	    for($shift = 0; $shift < 4; $shift++ ) {
 		    array_shift($return);
 	    }
