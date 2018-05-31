@@ -37,13 +37,13 @@ class Wifi
     {
 	    $return = '';
 	    exec('sudo ifup wlan0',$return);
-	    exec('sudo wpa_cli -i wlan0 scan',$return);
+	    exec('sudo wpa_cli -iwlan0 scan',$return);
 	    sleep(2);
-	    exec('sudo wpa_cli -i wlan0 scan_results',$return);
+	    exec('sudo wpa_cli scan_results',$return);
 	    for($shift = 0; $shift < 2; $shift++ ) {
 		    array_shift($return);
 	    }
-	    
+
 	    $networks = array();
 	    foreach($return as $network) {
 		    $arrNetwork = preg_split("/[\t]+/",$network);
@@ -71,7 +71,7 @@ class Wifi
 		
 		$wlan = array();
 		
-		$wlan['RxBytes'] = ""; 
+		$wlan['RxBytes'] = "";
 		$wlan['TxBytes'] = "";
 		
 		// Older ifconfig
