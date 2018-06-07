@@ -67,61 +67,61 @@ class Wifi
     public function info()
     {
         $return = "";
-		exec('/sbin/ifconfig wlan0',$return);
-		exec('/sbin/iwconfig wlan0',$return);
-		$strWlan0 = implode(" ",$return);
-		$strWlan0 = preg_replace('/\s\s+/', ' ', $strWlan0);
+		    exec('/sbin/ifconfig wlan0',$return);
+		    exec('/sbin/iwconfig wlan0',$return);
+		    $strWlan0 = implode(" ",$return);
+		    $strWlan0 = preg_replace('/\s\s+/', ' ', $strWlan0);
 		
-		$wlan = array();
+		    $wlan = array();
 		
-		$wlan['RxBytes'] = ""; 
-		$wlan['TxBytes'] = "";
+		    $wlan['RxBytes'] = "";
+		    $wlan['TxBytes'] = "";
 		
-		// Older ifconfig
-		preg_match('/HWaddr ([0-9a-f:]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['MacAddress'] = $result[1];
-		preg_match('/inet addr:([0-9.]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['IPAddress'] = $result[1];
-		preg_match('/Mask:([0-9.]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
-		preg_match('/RX packets:(\d+)/',$strWlan0,$result);
-		if (isset($result[1])) $wlan['RxPackets'] = $result[1];
-		preg_match('/TX packets:(\d+)/',$strWlan0,$result);
-		if (isset($result[1])) $wlan['TxPackets'] = $result[1];
-		preg_match('/RX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['RxBytes'] = $result[1];
-		preg_match('/TX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['TxBytes'] = $result[1];
+		    // Older ifconfig
+		    preg_match('/HWaddr ([0-9a-f:]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['MacAddress'] = $result[1];
+		    preg_match('/inet addr:([0-9.]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['IPAddress'] = $result[1];
+		    preg_match('/Mask:([0-9.]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
+		    preg_match('/RX packets:(\d+)/',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['RxPackets'] = $result[1];
+		    preg_match('/TX packets:(\d+)/',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['TxPackets'] = $result[1];
+		    preg_match('/RX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['RxBytes'] = $result[1];
+		    preg_match('/TX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['TxBytes'] = $result[1];
 		
-		// New ifconfig (strechh)
-	        preg_match('/inet ([0-9.]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['IPAddress'] = $result[1];
-		preg_match('/netmask ([0-9.]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
-		preg_match('/RX packets (\d+)/',$strWlan0,$result);
-		if (isset($result[1])) $wlan['RxPackets'] = $result[1];
-		preg_match('/TX packets (\d+)/',$strWlan0,$result);
-		if (isset($result[1])) $wlan['TxPackets'] = $result[1];
+		    // New ifconfig (strechh)
+	            preg_match('/inet ([0-9.]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['IPAddress'] = $result[1];
+		    preg_match('/netmask ([0-9.]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
+		    preg_match('/RX packets (\d+)/',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['RxPackets'] = $result[1];
+		    preg_match('/TX packets (\d+)/',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['TxPackets'] = $result[1];
 
-		preg_match('/ESSID:\"([a-zA-Z0-9_\-\s]+)\"/i',$strWlan0,$result); //Added some additional charicters here
-		if (isset($result[1])) $wlan['SSID'] = str_replace('"','',$result[1]);
-		preg_match('/Access Point: ([0-9a-f:]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['BSSID'] = $result[1];
-		preg_match('/Bit Rate:([0-9]+ Mb\/s)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['Bitrate'] = $result[1];
+		    preg_match('/ESSID:\"([a-zA-Z0-9_\-\s]+)\"/i',$strWlan0,$result); //Added some additional charicters here
+		    if (isset($result[1])) $wlan['SSID'] = str_replace('"','',$result[1]);
+		    preg_match('/Access Point: ([0-9a-f:]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['BSSID'] = $result[1];
+		    preg_match('/Bit Rate:([0-9]+ Mb\/s)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['Bitrate'] = $result[1];
 		
-		preg_match('/Bit Rate=([0-9]+ Mb\/s)/i',$strWlan0,$result); //Added alternative Bit Rate measure
-		if (isset($result[1])) $wlan['Bitrate'] = $result[1];
-		preg_match('/Frequency:(\d+\.\d+ GHz)/i',$strWlan0,$result); //escaped the full stop here
-		if (isset($result[1])) $wlan['Freq'] = $result[1];
-		preg_match('/Link Quality=([0-9]+\/[0-9]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['LinkQuality'] = $result[1];
-		preg_match('/Signal Level=([0-9]+\/[0-9]+)/i',$strWlan0,$result);
-		preg_match('/Signal Level=(\-[0-9]+ dBm)/i',$strWlan0,$result); //Added alternative Signal Level Measure
-		if (isset($result[1])) $wlan['SignalLevel'] = $result[1];
-		if ( (strpos($strWlan0, "ESSID") !== false) && (isset($wlan['SSID'])) ) $wlan['status'] = "connected"; else $wlan['status'] = "disconnected";
-		return $wlan; //Removed a few whitespace lines here
-	}
+		    preg_match('/Bit Rate=([0-9]+ Mb\/s)/i',$strWlan0,$result); //Added alternative Bit Rate measure
+		    if (isset($result[1])) $wlan['Bitrate'] = $result[1];
+		    preg_match('/Frequency:(\d+\.\d+ GHz)/i',$strWlan0,$result); //escaped the full stop here
+		    if (isset($result[1])) $wlan['Freq'] = $result[1];
+		    preg_match('/Link Quality=([0-9]+\/[0-9]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['LinkQuality'] = $result[1];
+		    preg_match('/Signal Level=([0-9]+\/[0-9]+)/i',$strWlan0,$result);
+		    preg_match('/Signal Level=(\-[0-9]+ dBm)/i',$strWlan0,$result); //Added alternative Signal Level Measure
+		    if (isset($result[1])) $wlan['SignalLevel'] = $result[1];
+		    if ( (strpos($strWlan0, "ESSID") !== false) && (isset($wlan['SSID'])) ) $wlan['status'] = "connected"; else $wlan['status'] = "disconnected";
+		    return $wlan; //Removed a few whitespace lines here
+	  }
 
     public function getconfig()
     {
