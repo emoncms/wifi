@@ -63,7 +63,7 @@ function wifi_controller()
     
     if ($session["read"] || $setup_access) {
         if ($route->action=="scan") {
-            if (file_exists("/home/pi/emonpi/emoncms_wifiscan.php")) {
+            if (file_exists("/home/pi/emonpi/emoncms_wifiscan.php")) {            
                 return cmd("/home/pi",$redis,"wifi/scan",array());
             } else {
                 $result = $wifi->scan();
@@ -85,20 +85,9 @@ function cmd($homedir,$redis,$classmethod,$properties) {
     if ($redis) {
         $redis->del($classmethod);                                        // 1. remove last result
         
-        $savepath = session_save_path();
-        
-        $update_flag = "$savepath/emoncms-flag-wifiscan";
         $update_script = "$homedir/emonpi/emoncms-wifiscan.sh";
         $update_logfile = "$homedir/data/emoncms-wifiscan.log";
-        
-        $fh = fopen($update_flag,"w");
-        if (!$fh) {
-            $result = "ERROR: Can't write the flag $update_flag.";
-        } else {
-            fwrite($fh,"$update_script>$update_logfile");
-            $result = "Update flag set";
-        }
-        fclose($fh); 
+        $redis->rpush("service-runner","$update_script>$update_logfile");
         
         $start = time();                                                  // 3. wait for result
         while((time()-$start)<5.0) { 
