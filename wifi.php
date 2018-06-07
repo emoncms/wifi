@@ -35,30 +35,33 @@ class Wifi
 	
     public function scan()
     {
-	    $return = '';
-	    exec('sudo ifup wlan0',$return);
-	    exec('sudo wpa_cli -i wlan0 scan',$return);
-	    sleep(2);
-	    exec('sudo wpa_cli -i wlan0 scan_results',$return);
-	    for($shift = 0; $shift < 2; $shift++ ) {
-		    array_shift($return);
-	    }
-	    
-	    $networks = array();
-	    foreach($return as $network) {
-		    $arrNetwork = preg_split("/[\t]+/",$network);
-		    if (isset($arrNetwork[4]))
-		    {
-		        $ssid = $arrNetwork[4];
-		        $networks[$ssid] = array(
-		            "BSSID"=>$arrNetwork[0],
-		            "CHANNEL"=>$arrNetwork[1],
-		            "SIGNAL"=>$arrNetwork[2],
-		            "SECURITY"=>substr($arrNetwork[3],1,-1)
-		        );
-		    }
-	    }
-	    return $networks;
+        // exec('sudo ifup wlan0',$return);
+        exec('sudo /sbin/wpa_cli -i wlan0 scan',$return);
+        // print "wlan scan: ".json_encode($return)."\n";
+
+        $scan_results = "";
+        exec("sudo /sbin/wpa_cli -i wlan0 scan_results",$scan_results);
+
+        $networks = array();
+        foreach($scan_results as $network)
+        {
+            if ($network!="bssid / frequency / signal level / flags / ssid") 
+            {
+                $arrNetwork = preg_split("/[\t]+/",$network);
+                if (isset($arrNetwork[4]))
+                {
+                    $ssid = $arrNetwork[4];
+                    $networks[$ssid] = array(
+                        "BSSID"=>$arrNetwork[0],
+                        "CHANNEL"=>$arrNetwork[1],
+                        "SIGNAL"=>$arrNetwork[2],
+                        "SECURITY"=>substr($arrNetwork[3],1,-1)
+                    );
+                }
+            }
+        }
+        // print json_encode($networks)."\n";
+        return $networks;
     }
     
     public function info()
