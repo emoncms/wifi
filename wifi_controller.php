@@ -14,11 +14,11 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function wifi_controller()
 {
-    global $session, $route;
+    global $homedir,$session, $route, $redis;
     
     $route->format = "json";
 
-    require "wifi.php";
+    require "Modules/wifi/wifi.php";
     $wifi = new Wifi();
     
     $result = false;
@@ -57,12 +57,18 @@ function wifi_controller()
         
         if ($route->action=="log") {
             $route->format = "text";
-            $result = $wifi->wifilog();  
+            $result = $wifi->wifilog();
         } 
     }
     
     if ($session["read"] || $setup_access) {
-        if ($route->action=="scan") $result = $wifi->scan();
+        if ($route->action=="scan") {
+            if (file_exists("/home/pi/emonpi/emoncms_wifiscan.php")) {            
+                return cmd("/home/pi",$redis,"wifi/scan",array());
+            } else {
+                $result = $wifi->scan();
+            }
+        }
     }
     
     if ($session["write"] || $setup_access) {
@@ -72,4 +78,23 @@ function wifi_controller()
     }
 
     return array('content' => $result);
+}
+
+        
+function cmd($homedir,$redis,$classmethod,$properties) {
+    if ($redis) {
+        $redis->del($classmethod);                                        // 1. remove last result
+        
+        $update_script = "$homedir/emonpi/emoncms-wifiscan.sh";
+        $update_logfile = "$homedir/data/emoncms-wifiscan.log";
+        $redis->rpush("service-runner","$update_script>$update_logfile");
+        
+        $start = time();                                                  // 3. wait for result
+        while((time()-$start)<5.0) { 
+            $result = $redis->get($classmethod);
+            if ($result) return json_decode($result);
+            usleep(100000); // check every 100ms
+        }
+    }
+    return false;
 }

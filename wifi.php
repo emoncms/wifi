@@ -8,20 +8,20 @@ class Wifi
 	    exec('sudo ifup wlan0',$return);
 	    return "wlan0 started";
 	}
-	
+
 	public function stop()
 	{
 	    exec('sudo ifdown wlan0',$return);
 	    return "wlan0 stopped";
 	}
-	
+
 	public function restart()
 	{
 		exec('sudo ifdown wlan0',$return);
 		exec('sudo ifup wlan0',$return);
 		return "wlan0 restarted";
 	}
-	
+
 	public function wifilog()
 	{
             if (file_exists("/home/pi/emonpi/wifiAP/networklog.sh"))
@@ -32,95 +32,96 @@ class Wifi
             }
             return "Error: Cannot find ~/emonpi/wifiap/networklog.sh";
 	}
-	
+
     public function scan()
     {
-	    $return = '';
-	    exec('sudo ifup wlan0',$return);
-	    exec('sudo wpa_cli scan',$return);
-	    sleep(2);
-	    exec('sudo wpa_cli scan_results',$return);
-	    for($shift = 0; $shift < 4; $shift++ ) {
-		    array_shift($return);
-	    }
-	    
-	    $networks = array();
-	    foreach($return as $network) {
-		    $arrNetwork = preg_split("/[\t]+/",$network);
-		    if (isset($arrNetwork[4]))
-		    {
-		        $ssid = $arrNetwork[4];
-		        $networks[$ssid] = array(
-		            "BSSID"=>$arrNetwork[0],
-		            "CHANNEL"=>$arrNetwork[1],
-		            "SIGNAL"=>$arrNetwork[2],
-		            "SECURITY"=>substr($arrNetwork[3],1,-1)
-		        );
-		    }
-	    }
-	    return $networks;
+        // exec('sudo ifup wlan0',$return);
+        exec('sudo /sbin/wpa_cli -i wlan0 scan',$return);
+        // print "wlan scan: ".json_encode($return)."\n";
+
+        $scan_results = "";
+        exec("sudo /sbin/wpa_cli -i wlan0 scan_results",$scan_results);
+
+        $networks = array();
+        foreach($scan_results as $network)
+        {
+            if ($network!="bssid / frequency / signal level / flags / ssid")
+            {
+                $arrNetwork = preg_split("/[\t]+/",$network);
+                if (isset($arrNetwork[4]))
+                {
+                    $ssid = $arrNetwork[4];
+                    $networks[$ssid] = array(
+                        "BSSID"=>$arrNetwork[0],
+                        "CHANNEL"=>$arrNetwork[1],
+                        "SIGNAL"=>$arrNetwork[2],
+                        "SECURITY"=>substr($arrNetwork[3],1,-1)
+                    );
+                }
+            }
+        }
+        // print json_encode($networks)."\n";
+        return $networks;
     }
-    
+
     public function info()
     {
         $return = "";
-		exec('/sbin/ifconfig wlan0',$return);
-		exec('/sbin/iwconfig wlan0',$return);
-		$strWlan0 = implode(" ",$return);
-		$strWlan0 = preg_replace('/\s\s+/', ' ', $strWlan0);
-		
-		$wlan = array();
-		
-		$wlan['RxBytes'] = ""; 
-		$wlan['TxBytes'] = "";
-		
-		// Older ifconfig
-		preg_match('/HWaddr ([0-9a-f:]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['MacAddress'] = $result[1];
-		preg_match('/inet addr:([0-9.]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['IPAddress'] = $result[1];
-		preg_match('/Mask:([0-9.]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
-		preg_match('/RX packets:(\d+)/',$strWlan0,$result);
-		if (isset($result[1])) $wlan['RxPackets'] = $result[1];
-		preg_match('/TX packets:(\d+)/',$strWlan0,$result);
-		if (isset($result[1])) $wlan['TxPackets'] = $result[1];
-		preg_match('/RX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['RxBytes'] = $result[1];
-		preg_match('/TX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['TxBytes'] = $result[1];
-		
-		// New ifconfig (strech)
-		preg_match('/inet6 ([0-9a-f:]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['MacAddress'] = $result[1];
-		preg_match('/inet ([0-9.]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['IPAddress'] = $result[1];
-		preg_match('/netmask ([0-9.]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
-		preg_match('/RX packets (\d+)/',$strWlan0,$result);
-		if (isset($result[1])) $wlan['RxPackets'] = $result[1];
-		preg_match('/TX packets (\d+)/',$strWlan0,$result);
-		if (isset($result[1])) $wlan['TxPackets'] = $result[1];
+		    exec('/sbin/ifconfig wlan0',$return);
+		    exec('/sbin/iwconfig wlan0',$return);
+		    $strWlan0 = implode(" ",$return);
+		    $strWlan0 = preg_replace('/\s\s+/', ' ', $strWlan0);
 
-		preg_match('/ESSID:\"([a-zA-Z0-9_\-\s]+)\"/i',$strWlan0,$result); //Added some additional charicters here
-		if (isset($result[1])) $wlan['SSID'] = str_replace('"','',$result[1]);
-		preg_match('/Access Point: ([0-9a-f:]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['BSSID'] = $result[1];
-		preg_match('/Bit Rate:([0-9]+ Mb\/s)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['Bitrate'] = $result[1];
-		
-		preg_match('/Bit Rate=([0-9]+ Mb\/s)/i',$strWlan0,$result); //Added alternative Bit Rate measure
-		if (isset($result[1])) $wlan['Bitrate'] = $result[1];
-		preg_match('/Frequency:(\d+\.\d+ GHz)/i',$strWlan0,$result); //escaped the full stop here
-		if (isset($result[1])) $wlan['Freq'] = $result[1];
-		preg_match('/Link Quality=([0-9]+\/[0-9]+)/i',$strWlan0,$result);
-		if (isset($result[1])) $wlan['LinkQuality'] = $result[1];
-		preg_match('/Signal Level=([0-9]+\/[0-9]+)/i',$strWlan0,$result);
-		preg_match('/Signal Level=(\-[0-9]+ dBm)/i',$strWlan0,$result); //Added alternative Signal Level Measure
-		if (isset($result[1])) $wlan['SignalLevel'] = $result[1];
-		if ( (strpos($strWlan0, "ESSID") !== false) && (isset($wlan['SSID'])) ) $wlan['status'] = "connected"; else $wlan['status'] = "disconnected";
-		return $wlan; //Removed a few whitespace lines here
-	}
+		    $wlan = array();
+
+		    $wlan['RxBytes'] = "";
+		    $wlan['TxBytes'] = "";
+
+		    // Older ifconfig
+		    preg_match('/HWaddr ([0-9a-f:]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['MacAddress'] = $result[1];
+		    preg_match('/inet addr:([0-9.]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['IPAddress'] = $result[1];
+		    preg_match('/Mask:([0-9.]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
+		    preg_match('/RX packets:(\d+)/',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['RxPackets'] = $result[1];
+		    preg_match('/TX packets:(\d+)/',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['TxPackets'] = $result[1];
+		    preg_match('/RX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['RxBytes'] = $result[1];
+		    preg_match('/TX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['TxBytes'] = $result[1];
+
+		    // New ifconfig (strechh)
+	            preg_match('/inet ([0-9.]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['IPAddress'] = $result[1];
+		    preg_match('/netmask ([0-9.]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['SubNetMask'] = $result[1];
+		    preg_match('/RX packets (\d+)/',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['RxPackets'] = $result[1];
+		    preg_match('/TX packets (\d+)/',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['TxPackets'] = $result[1];
+
+		    preg_match('/ESSID:\"([a-zA-Z0-9_\-\s]+)\"/i',$strWlan0,$result); //Added some additional charicters here
+		    if (isset($result[1])) $wlan['SSID'] = str_replace('"','',$result[1]);
+		    preg_match('/Access Point: ([0-9a-f:]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['BSSID'] = $result[1];
+		    preg_match('/Bit Rate:([0-9]+ Mb\/s)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['Bitrate'] = $result[1];
+
+		    preg_match('/Bit Rate=([0-9]+ Mb\/s)/i',$strWlan0,$result); //Added alternative Bit Rate measure
+		    if (isset($result[1])) $wlan['Bitrate'] = $result[1];
+		    preg_match('/Frequency:(\d+\.\d+ GHz)/i',$strWlan0,$result); //escaped the full stop here
+		    if (isset($result[1])) $wlan['Freq'] = $result[1];
+		    preg_match('/Link Quality=([0-9]+\/[0-9]+)/i',$strWlan0,$result);
+		    if (isset($result[1])) $wlan['LinkQuality'] = $result[1];
+		    preg_match('/Signal Level=([0-9]+\/[0-9]+)/i',$strWlan0,$result);
+		    preg_match('/Signal Level=(\-[0-9]+ dBm)/i',$strWlan0,$result); //Added alternative Signal Level Measure
+		    if (isset($result[1])) $wlan['SignalLevel'] = $result[1];
+		    if ( (strpos($strWlan0, "ESSID") !== false) && (isset($wlan['SSID'])) ) $wlan['status'] = "connected"; else $wlan['status'] = "disconnected";
+		    return $wlan; //Removed a few whitespace lines here
+	  }
 
     public function getconfig()
     {
@@ -147,7 +148,7 @@ class Wifi
         }
         return $registered;
     }
-    
+
     public function setconfig($networks)
     {
 	    $config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\n\n";
@@ -155,14 +156,14 @@ class Wifi
         foreach ($networks as $ssid=>$network)
         {
 		    $ssid = escapeshellarg($ssid);
-		    
+
 		    $psk = "";
 		    if (isset($network->PSK) && $network->PSK!="")
 		    {
 		        $psk = escapeshellarg($network->PSK);
 		        $result = "";
 		        exec('wpa_passphrase '.$ssid.' '.$psk, $result);
-		        
+
 		        foreach($result as $b) {
 			        if("Passphrase must be 8..63 characters" != $b) {
 				        $config .= "$b\n";
@@ -183,8 +184,7 @@ class Wifi
       }
 
 	    $this->restart();
-	    
+
 	    return $config;
 	}
 }
-
