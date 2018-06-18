@@ -157,7 +157,12 @@ class Wifi
         {
 		    if (!empty($network->PSK) && (strlen($network->PSK) > 8 && strlen($network->PSK) < 64))
 		    {
-				$config .= hash_pbkdf2("sha1",$network->PSK, $ssid, 4096, 64).PHP_EOL;
+				$psk = hash_pbkdf2("sha1",$network->PSK, $ssid, 4096, 64).PHP_EOL;
+				$config .= sprintf("network={
+					ssid=\"%s\"
+					#psk=\"%s\"
+					psk=%s
+				}", $ssid, $network->PSK, $psk);
 		    }
 		    else
 		    {
