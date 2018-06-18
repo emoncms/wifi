@@ -155,29 +155,26 @@ class Wifi
 
         foreach ($networks as $ssid=>$network)
         {
-		    $ssid = escapeshellarg($ssid);
-		    
-		    $psk = "";
-		    if (isset($network->PSK) && $network->PSK!="")
+		    if (!empty($network->PSK) && (strlen($network->PSK) > 8 && strlen($network->PSK) < 64))
 		    {
-		        $psk = escapeshellarg($network->PSK);
-		        $result = "";
-		        exec('wpa_passphrase '.$ssid.' '.$psk, $result);
-		        
-		        foreach($result as $b) {
-			        if("Passphrase must be 8..63 characters" != $b) {
-				        $config .= "$b\n";
-			        }
-		        }
+				$config .= hash_pbkdf2("sha1",$network->PSK, $ssid, 4096, 64).PHP_EOL;
 		    }
 		    else
 		    {
 		        $config .= "network={\n  ssid=".'"'.$ssid.'"'."\n  key_mgmt=NONE\n}\n";
 		    }
-	    }
-	    exec("echo '$config' > /tmp/wifidata",$return);
-	    system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
-	    // system('sudo cp /tmp/wifidata /home/pi/data/wpa_supplicant.conf',$returnval);
+		}
+		$temp = tmpfile();
+		$path = stream_get_meta_data($temp)['uri'];
+		if ($temp) {
+			fwrite($temp, $config);
+			$wpa_supplicant = "/etc/wpa_supplicant/wpa_supplicant.conf";
+			system("sudo cp $path $wpa_supplicant", $returnval);
+			if ($returnval===false) return "Error: Cannot write to $wpa_supplicant";
+		} else {
+			return "Error: Cannot create temporary file: $path";
+		}
+		fclose($temp);
 
       if (file_exists("/home/pi/data/wifiAP-enabled")) {
           exec("sudo /home/pi/emonpi/wifiAP/stopAP.sh");
