@@ -36,11 +36,15 @@ class Wifi
     public function scan()
     {
         // exec('sudo ifup wlan0',$return);
-        exec("wpa_cli -i wlan0 scan; sleep 10",$return);
+        exec("sudo wpa_cli -i wlan0 scan",$return);
+        sleep(3);
+        
         print "wlan scan: ".json_encode($return)."\n";
 
         $scan_results = "";
-        exec("wpa_cli -i wlan0 scan_results",$scan_results);
+        exec("sudo wpa_cli -i wlan0 scan_results",$scan_results);
+        echo $return;
+        echo $scan_results;
 
         $networks = array();
         foreach($scan_results as $network)
