@@ -36,11 +36,11 @@ class Wifi
     public function scan()
     {
         // exec('sudo ifup wlan0',$return);
-        exec('sudo /sbin/wpa_cli -i wlan0 scan',$return);
-        // print "wlan scan: ".json_encode($return)."\n";
+        exec("wpa_cli -i wlan0 scan; sleep 10",$return);
+        print "wlan scan: ".json_encode($return)."\n";
 
         $scan_results = "";
-        exec("sudo /sbin/wpa_cli -i wlan0 scan_results",$scan_results);
+        exec("wpa_cli -i wlan0 scan_results",$scan_results);
 
         $networks = array();
         foreach($scan_results as $network)
@@ -60,7 +60,7 @@ class Wifi
                 }
             }
         }
-        // print json_encode($networks)."\n";
+        print json_encode($networks)."\n";
         return $networks;
     }
     
