@@ -151,7 +151,7 @@ class Wifi
     
     public function setconfig($networks)
     {
-	    $config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\n\n";
+	    $config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=GB\n\n";
 
         foreach ($networks as $ssid=>$network)
         {
