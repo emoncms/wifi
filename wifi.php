@@ -8,20 +8,20 @@ class Wifi
 	    exec('sudo ifup wlan0',$return);
 	    return "wlan0 started";
 	}
-	
+
 	public function stop()
 	{
 	    exec('sudo ifdown wlan0',$return);
 	    return "wlan0 stopped";
 	}
-	
+
 	public function restart()
 	{
 		exec('sudo ifdown wlan0',$return);
 		exec('sudo ifup wlan0',$return);
 		return "wlan0 restarted";
 	}
-	
+
 	public function wifilog()
 	{
             if (file_exists("/home/pi/emonpi/wifiAP/networklog.sh"))
@@ -32,20 +32,24 @@ class Wifi
             }
             return "Error: Cannot find ~/emonpi/wifiap/networklog.sh";
 	}
-	
+
     public function scan()
     {
         // exec('sudo ifup wlan0',$return);
-        exec('sudo /sbin/wpa_cli -i wlan0 scan',$return);
-        // print "wlan scan: ".json_encode($return)."\n";
+        exec("sudo wpa_cli -i wlan0 scan",$return);
+        sleep(3);
+
+        print "wlan scan: ".json_encode($return)."\n";
 
         $scan_results = "";
-        exec("sudo /sbin/wpa_cli -i wlan0 scan_results",$scan_results);
+        exec("sudo wpa_cli -i wlan0 scan_results",$scan_results);
+        echo $return;
+        echo $scan_results;
 
         $networks = array();
         foreach($scan_results as $network)
         {
-            if ($network!="bssid / frequency / signal level / flags / ssid") 
+            if ($network!="bssid / frequency / signal level / flags / ssid")
             {
                 $arrNetwork = preg_split("/[\t]+/",$network);
                 if (isset($arrNetwork[4]))
@@ -60,10 +64,10 @@ class Wifi
                 }
             }
         }
-        // print json_encode($networks)."\n";
+        print json_encode($networks)."\n";
         return $networks;
     }
-    
+
     public function info()
     {
         $return = "";
@@ -71,12 +75,12 @@ class Wifi
 		    exec('/sbin/iwconfig wlan0',$return);
 		    $strWlan0 = implode(" ",$return);
 		    $strWlan0 = preg_replace('/\s\s+/', ' ', $strWlan0);
-		
+
 		    $wlan = array();
-		
+
 		    $wlan['RxBytes'] = "";
 		    $wlan['TxBytes'] = "";
-		
+
 		    // Older ifconfig
 		    preg_match('/HWaddr ([0-9a-f:]+)/i',$strWlan0,$result);
 		    if (isset($result[1])) $wlan['MacAddress'] = $result[1];
@@ -92,7 +96,7 @@ class Wifi
 		    if (isset($result[1])) $wlan['RxBytes'] = $result[1];
 		    preg_match('/TX Bytes:(\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result);
 		    if (isset($result[1])) $wlan['TxBytes'] = $result[1];
-		
+
 		    // New ifconfig (strechh)
 	            preg_match('/inet ([0-9.]+)/i',$strWlan0,$result);
 		    if (isset($result[1])) $wlan['IPAddress'] = $result[1];
@@ -109,7 +113,7 @@ class Wifi
 		    if (isset($result[1])) $wlan['BSSID'] = $result[1];
 		    preg_match('/Bit Rate:([0-9]+ Mb\/s)/i',$strWlan0,$result);
 		    if (isset($result[1])) $wlan['Bitrate'] = $result[1];
-		
+
 		    preg_match('/Bit Rate=([0-9]+ Mb\/s)/i',$strWlan0,$result); //Added alternative Bit Rate measure
 		    if (isset($result[1])) $wlan['Bitrate'] = $result[1];
 		    preg_match('/Frequency:(\d+\.\d+ GHz)/i',$strWlan0,$result); //escaped the full stop here
@@ -148,44 +152,33 @@ class Wifi
         }
         return $registered;
     }
-    
+
     public function setconfig($networks)
     {
-	    $config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\n\n";
+	    $config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=GB\n\n";
 
         foreach ($networks as $ssid=>$network)
         {
-		    $ssid = escapeshellarg($ssid);
-		    
-		    $psk = "";
-		    if (isset($network->PSK) && $network->PSK!="")
+		    if (!empty($network->PSK) && (strlen($network->PSK) > 8 && strlen($network->PSK) < 64))
 		    {
-		        $psk = escapeshellarg($network->PSK);
-		        $result = "";
-		        exec('wpa_passphrase '.$ssid.' '.$psk, $result);
-		        
-		        foreach($result as $b) {
-			        if("Passphrase must be 8..63 characters" != $b) {
-				        $config .= "$b\n";
-			        }
-		        }
+				$psk = hash_pbkdf2("sha1",$network->PSK, $ssid, 4096, 64);
+				$config .= sprintf("\nnetwork={\n\tssid=\"%s\"\n\t#psk=\"%s\"\n\tpsk=%s\n}\n", $ssid, $network->PSK, $psk);
 		    }
 		    else
 		    {
 		        $config .= "network={\n  ssid=".'"'.$ssid.'"'."\n  key_mgmt=NONE\n}\n";
 		    }
-	    }
-	    exec("echo '$config' > /tmp/wifidata",$return);
-	    system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
-	    // system('sudo cp /tmp/wifidata /home/pi/data/wpa_supplicant.conf',$returnval);
+		}
+
+    exec("echo '$config' > /tmp/wifidata",$return);
+    system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
 
       if (file_exists("/home/pi/data/wifiAP-enabled")) {
           exec("sudo /home/pi/emonpi/wifiAP/stopAP.sh");
       }
 
 	    $this->restart();
-	    
+
 	    return $config;
 	}
 }
-
