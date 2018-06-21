@@ -43,9 +43,7 @@ class Wifi
 
         $scan_results = "";
         exec("sudo wpa_cli -i wlan0 scan_results",$scan_results);
-        echo $return;
-        echo $scan_results;
-
+  
         $networks = array();
         foreach($scan_results as $network)
         {
