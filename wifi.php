@@ -35,7 +35,7 @@ class Wifi
 
     public function scan()
     {
-        // exec('sudo ifup wlan0',$return);
+        exec('sudo ifup wlan0',$return);
         exec("sudo wpa_cli -i wlan0 scan",$return);
         sleep(3);
 
