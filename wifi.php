@@ -183,7 +183,7 @@ class Wifi
             exec("sudo /home/pi/emonpi/wifiAP/stopAP.sh");
         }
 
-        // $this->restart();
+        $this->restart();
 
         return $config;
     }
