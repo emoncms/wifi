@@ -44,8 +44,8 @@ function wifi_controller()
      
     // ------------------------------------------------------------
     // Read level access
-    // ------------------------------------------------------------   
-    if ($session["read"]) {
+    // ------------------------------------------------------------       
+    if ($session["read"] || $setup_access) {
     
         if ($route->action=="info") {
             $result = $wifi->info();
@@ -59,9 +59,7 @@ function wifi_controller()
             $route->format = "text";
             $result = $wifi->wifilog();
         } 
-    }
     
-    if ($session["read"] || $setup_access) {
         if ($route->action=="scan") {
             if (file_exists("/home/pi/emonpi/emoncms_wifiscan.php")) {            
                 return cmd("/home/pi",$redis,"wifi/scan",array());
@@ -73,7 +71,10 @@ function wifi_controller()
     
     if ($session["write"] || $setup_access) {
         if ($route->action=="setconfig") {
-            $result = $wifi->setconfig(json_decode($_POST['networks']));
+	          $networks = post('networks');
+	          $country = "GB"; 
+	          if (isset($_POST['country'])) $country = $_POST['country'];
+            $result = $wifi->setconfig(json_decode($networks),$country);
         }
     }
 

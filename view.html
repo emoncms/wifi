@@ -1,6 +1,7 @@
     <h2>WiFi Config</h2>
     <br>
     <p>Connect emonPi / emonBase to local WiFi network.</p>
+    <P>Selected country: <span id="country"></span></p>
     <button id="wifi_scan" class="btn btn-info">Scan</button>
     
     <br><br>
@@ -44,7 +45,11 @@
 
 <script>
 
-    var networks = wifi_getconfig();
+    var config = wifi_getconfig();
+    var networks = config.networks;
+    var country = config.country;
+    $("#country").html(country);
+    
     for (z in networks) {
         networks[z].enabled = true;
     }
@@ -59,7 +64,7 @@
     });
 
     $("#wifi_stop").click(function(){
-        $.ajax({ type: 'POST', url: "wifi/stop.json.json" });
+        $.ajax({ type: 'POST', url: "wifi/stop.json" });
     });
     
     $("#wifi_reset").click(function(){
@@ -91,7 +96,7 @@
             if (enabled) networks_to_save[z] = networks[z];
         }
     
-        $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks_to_save), dataType: 'text', async: true,
+        $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks_to_save)+"&country="+country, dataType: 'text', async: true,
             success: function(data) {
                 console.log("wifi/setconfig.json:");
                 alert("Config saved, check connection status below");
@@ -190,8 +195,7 @@
                 out += "<tr><td></td><td><b>PSK</b></td>";
             }
             
-            out +=
-             "<td><input class='psk' ssid='"+z+"' type='password' value='";
+            out += "<td><input class='psk' ssid='"+z+"' type='password' value='";
             if (networks[z]['PSK']!=undefined) out += networks[z]['PSK'];
             out += "'/ > <i ssid='"+z+"' class='showpsk icon-eye-open' style='cursor:pointer'></i></td><td></td></tr>";
             out += "</tr>";
