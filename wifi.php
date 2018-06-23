@@ -43,9 +43,7 @@ class Wifi
 
         $scan_results = "";
         exec("sudo wpa_cli -i wlan0 scan_results",$scan_results);
-        echo $return;
-        echo $scan_results;
-
+  
         $networks = array();
         foreach($scan_results as $network)
         {
@@ -132,15 +130,21 @@ class Wifi
         exec('sudo cat /etc/wpa_supplicant/wpa_supplicant.conf',$return);
         $ssid = array();
         $psk = array();
+        $country = "test";
         foreach($return as $a) {
-	        if(preg_match('/SSID/i',$a)) {
-		        $arrssid = explode("=",$a);
-		        $ssid[] = str_replace('"','',$arrssid[1]);
-	        }
-	        if(preg_match('/\#psk/i',$a)) {
-		        $arrpsk = explode("=",$a);
-		        $psk[] = str_replace('"','',$arrpsk[1]);
-	        }
+	          if(preg_match('/SSID/i',$a)) {
+		            $arrssid = explode("=",$a);
+		            $ssid[] = str_replace('"','',$arrssid[1]);
+	          }
+	          if(preg_match('/\#psk/i',$a)) {
+		            $arrpsk = explode("=",$a);
+		            $psk[] = str_replace('"','',$arrpsk[1]);
+	          }
+	          if(preg_match('/country/i',$a)) {
+		            $arrcountry = explode("=",$a); 
+		            $country = trim($arrcountry[1]);
+		            if (strlen($country)!=2) $country = "GB";
+	          }
         }
         $numSSIDs = count($ssid);
 
@@ -150,35 +154,35 @@ class Wifi
             if (isset($psk[$i])) $registered[$ssid[$i]]["PSK"] = $psk[$i];
             $registered[$ssid[$i]]["SIGNAL"] = 0;
         }
-        return $registered;
+        return array("networks"=>$registered,"country"=>$country);
     }
 
-    public function setconfig($networks)
+    public function setconfig($networks,$country_code)
     {
-	    $config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=GB\n\n";
+        $country_code = strtoupper($country_code);
+        if (strlen($country_code)!=2) return array("success"=>false, "message"=>"Country code must be characters long");
+        
+        $config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=$country_code\n\n";
+        if(!empty($networks)) {
+            foreach ($networks as $ssid=>$network) {
+                if (!empty($network->PSK) && (strlen($network->PSK) > 8 && strlen($network->PSK) < 64)) {
+                    $psk = hash_pbkdf2("sha1",$network->PSK, $ssid, 4096, 64);
+                    $config .= sprintf("\nnetwork={\n\tssid=\"%s\"\n\t#psk=\"%s\"\n\tpsk=%s\n}\n", $ssid, $network->PSK, $psk);
+                } else {
+                    $config .= "network={\n  ssid=".'"'.$ssid.'"'."\n  key_mgmt=NONE\n}\n";
+                }
+            }
+        }	
 
-        foreach ($networks as $ssid=>$network)
-        {
-		    if (!empty($network->PSK) && (strlen($network->PSK) > 8 && strlen($network->PSK) < 64))
-		    {
-				$psk = hash_pbkdf2("sha1",$network->PSK, $ssid, 4096, 64);
-				$config .= sprintf("\nnetwork={\n\tssid=\"%s\"\n\t#psk=\"%s\"\n\tpsk=%s\n}\n", $ssid, $network->PSK, $psk);
-		    }
-		    else
-		    {
-		        $config .= "network={\n  ssid=".'"'.$ssid.'"'."\n  key_mgmt=NONE\n}\n";
-		    }
-		}
+        exec("echo '$config' > /tmp/wifidata",$return);
+        system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
 
-    exec("echo '$config' > /tmp/wifidata",$return);
-    system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
+        if (file_exists("/home/pi/data/wifiAP-enabled")) {
+            exec("sudo /home/pi/emonpi/wifiAP/stopAP.sh");
+        }
 
-      if (file_exists("/home/pi/data/wifiAP-enabled")) {
-          exec("sudo /home/pi/emonpi/wifiAP/stopAP.sh");
-      }
+        $this->restart();
 
-	    $this->restart();
-
-	    return $config;
-	}
+        return $config;
+    }
 }
