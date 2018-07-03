@@ -130,7 +130,7 @@ class Wifi
         exec('sudo cat /etc/wpa_supplicant/wpa_supplicant.conf',$return);
         $ssid = array();
         $psk = array();
-        $country = "test";
+        $country = "";
         foreach($return as $a) {
 	          if(preg_match('/SSID/i',$a)) {
 		            $arrssid = explode("=",$a);
@@ -143,10 +143,10 @@ class Wifi
 	          if(preg_match('/country/i',$a)) {
 		            $arrcountry = explode("=",$a); 
 		            $country = trim($arrcountry[1]);
-		            if (strlen($country)!=2) $country = "GB";
 	          }
         }
         $numSSIDs = count($ssid);
+        if (strlen($country)!=2) $country = "GB";
 
         $registered = array();
         for($i = 0; $i < $numSSIDs; $i++) {
