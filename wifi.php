@@ -165,7 +165,7 @@ class Wifi
         $config = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=$country_code\n\n";
         if(!empty($networks)) {
             foreach ($networks as $ssid=>$network) {
-                if (!empty($network->PSK) && (strlen($network->PSK) > 8 && strlen($network->PSK) < 64)) {
+                if (!empty($network->PSK) && (strlen($network->PSK) >= 8 && strlen($network->PSK) < 64)) {
                     $psk = hash_pbkdf2("sha1",$network->PSK, $ssid, 4096, 64);
                     $config .= sprintf("\nnetwork={\n\tssid=\"%s\"\n\t#psk=\"%s\"\n\tpsk=%s\n}\n", $ssid, $network->PSK, $psk);
                 } else {
