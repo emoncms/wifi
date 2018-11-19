@@ -104,6 +104,12 @@ class Wifi
 		    if (isset($result[1])) $wlan['RxPackets'] = $result[1];
 		    preg_match('/TX packets (\d+)/',$strWlan0,$result);
 		    if (isset($result[1])) $wlan['TxPackets'] = $result[1];
+	    	    preg_match('/ether ([0-9a-f:]+)/i',$strWlan0,$result); // Adding MAC Address for onboard wifi
+                    if (isset($result[1])) $wlan['MacAddress'] = $result[1];
+	    	    preg_match('/RX packets \d+ bytes (\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result); // Adding RX Bytes
+                    if (isset($result[1])) $wlan['RxBytes'] = $result[1];
+                    preg_match('/TX packets \d+ bytes (\d+ \(\d+.\d+ [K|M|G]iB\))/i',$strWlan0,$result); // Adding TX Bytes
+                    if (isset($result[1])) $wlan['TxBytes'] = $result[1];
 
 		    preg_match('/ESSID:\"([a-zA-Z0-9_\-\s]+)\"/i',$strWlan0,$result); //Added some additional charicters here
 		    if (isset($result[1])) $wlan['SSID'] = str_replace('"','',$result[1]);
