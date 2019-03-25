@@ -178,10 +178,12 @@ class Wifi
                     $config .= "network={\n  ssid=".'"'.$ssid.'"'."\n  key_mgmt=NONE\n}\n";
                 }
             }
-        }	
+        }
+        
+        system("echo '$config' | sudo /usr/bin/tee /etc/wpa_supplicant/wpa_supplicant.conf",$returnval);
 
-        exec("echo '$config' > /tmp/wifidata",$return);
-        system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
+        //exec("echo '$config' > /tmp/wifidata",$return);
+        //system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
 
         if (file_exists("/home/pi/data/wifiAP-enabled")) {
             exec("sudo /home/pi/emonpi/wifiAP/stopAP.sh");
