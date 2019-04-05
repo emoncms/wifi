@@ -3,35 +3,37 @@
 
 class Wifi
 {
-	public function start()
-	{
-	    exec('sudo ifup wlan0',$return);
-	    return "wlan0 started";
-	}
+	  public function start()
+	  {
+	      exec('sudo ifup wlan0',$return);
+	      return "wlan0 started";
+	  }
 
-	public function stop()
-	{
-	    exec('sudo ifdown wlan0',$return);
-	    return "wlan0 stopped";
-	}
+	  public function stop()
+	  {
+	      exec('sudo ifdown wlan0',$return);
+	      return "wlan0 stopped";
+	  }
 
-	public function restart()
-	{
-		exec('sudo ifdown wlan0',$return);
-		exec('sudo ifup wlan0',$return);
-		return "wlan0 restarted";
-	}
+	  public function restart()
+	  {
+		  exec('sudo ifdown wlan0',$return);
+		  exec('sudo ifup wlan0',$return);
+		  return "wlan0 restarted";
+	  }
 
-	public function wifilog()
-	{
-            if (file_exists("/home/pi/emonpi/wifiAP/networklog.sh"))
-            {
- 	      exec('sudo /home/pi/emonpi/wifiAP/networklog.sh',$out);
-	      $result = ""; foreach($out as $line) $result .= $line."\n";
-	      return $result;
-            }
-            return "Error: Cannot find ~/emonpi/wifiap/networklog.sh";
-	}
+	  public function wifilog()
+	  {
+	      global $homedir;
+	      
+        if (file_exists("$homedir/emonpi/wifiAP/networklog.sh"))
+        {
+            exec("sudo $homedir/emonpi/wifiAP/networklog.sh",$out);
+            $result = ""; foreach($out as $line) $result .= $line."\n";
+            return $result;
+        }
+        return "Error: Cannot find $homedir/emonpi/wifiap/networklog.sh";
+	  }
 
     public function scan()
     {
@@ -165,6 +167,8 @@ class Wifi
 
     public function setconfig($networks,$country_code)
     {
+        global $homedir;
+        
         $country_code = strtoupper($country_code);
         if (strlen($country_code)!=2) return array("success"=>false, "message"=>"Country code must be characters long");
         
@@ -183,8 +187,8 @@ class Wifi
         exec("echo '$config' > /tmp/wifidata",$return);
         system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
 
-        if (file_exists("/home/pi/data/wifiAP-enabled")) {
-            exec("sudo /home/pi/emonpi/wifiAP/stopAP.sh");
+        if (file_exists("$homedir/data/wifiAP-enabled")) {
+            exec("sudo $homedir/emonpi/wifiAP/stopAP.sh");
         }
 
         $this->restart();
