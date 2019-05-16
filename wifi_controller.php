@@ -61,8 +61,8 @@ function wifi_controller()
         } 
     
         if ($route->action=="scan") {
-            if (file_exists("/home/pi/emonpi/emoncms_wifiscan.php")) {            
-                return cmd("/home/pi",$redis,"wifi/scan",array());
+            if (file_exists("$homedir/emonpi/emoncms_wifiscan.php")) {            
+                return cmd("$homedir",$redis,"wifi/scan",array());
             } else {
                 $result = $wifi->scan();
             }
