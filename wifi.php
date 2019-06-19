@@ -24,15 +24,15 @@ class Wifi
 
 	  public function wifilog()
 	  {
-	      global $homedir;
-	      
-        if (file_exists("$homedir/emonpi/wifiAP/networklog.sh"))
+	      global $openenergymonitor_dir;
+
+        if (file_exists("$openenergymonitor_dir/emonpi/wifiAP/networklog.sh"))
         {
-            exec("sudo $homedir/emonpi/wifiAP/networklog.sh",$out);
+            exec("sudo $openenergymonitor_dir/emonpi/wifiAP/networklog.sh",$out);
             $result = ""; foreach($out as $line) $result .= $line."\n";
             return $result;
         }
-        return "Error: Cannot find $homedir/emonpi/wifiap/networklog.sh";
+        return "Error: Cannot find $openenergymonitor_dir/emonpi/wifiap/networklog.sh";
 	  }
 
     public function scan()
@@ -167,7 +167,7 @@ class Wifi
 
     public function setconfig($networks,$country_code)
     {
-        global $homedir;
+        global $openenergymonitor_dir;
         
         $country_code = strtoupper($country_code);
         if (strlen($country_code)!=2) return array("success"=>false, "message"=>"Country code must be characters long");
@@ -187,8 +187,8 @@ class Wifi
         exec("echo '$config' > /tmp/wifidata",$return);
         system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
 
-        if (file_exists("$homedir/data/wifiAP-enabled")) {
-            exec("sudo $homedir/emonpi/wifiAP/stopAP.sh");
+        if (file_exists("$openenergymonitor_dir/data/wifiAP-enabled")) {
+            exec("sudo $openenergymonitor_dir/emonpi/wifiAP/stopAP.sh");
         }
 
         $this->restart();
