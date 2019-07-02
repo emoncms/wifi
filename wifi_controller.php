@@ -38,7 +38,7 @@ function wifi_controller()
             $result = $wifi->start();
         } elseif ($route->action=="stop") {
             $result = $wifi->stop();
-        if ($route->action=="restart") {
+        } elseif ($route->action=="restart") {
             $result = $wifi->restart();
         } elseif ($route->action=="") {
             $route->format = "html";
