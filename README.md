@@ -21,5 +21,5 @@ Append the following to the end of `/etc/sudoers`:
 ```
 ## Licence
 
-GNU AFFERO GENERAL PUBLIC LICENSE, see emoncms repo: 
+GNU AFFERO GENERAL PUBLIC LICENSE, see emoncms repo:<br>
 https://github.com/emoncms/emoncms/blob/master/LICENSE.txt
