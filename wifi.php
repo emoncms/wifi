@@ -84,7 +84,7 @@ class Wifi
             $wlan['MacAddress'] = $result[1];
         }
 
-        preg_match('/inet (?:addr:)? ?([0-9.]+)/i' $strWlan0, $result);
+        preg_match('/inet (?:addr:)? ?([0-9.]+)/i', $strWlan0, $result);
         if (isset($result[1])) {
             $wlan['IPAddress'] = $result[1];
         }
