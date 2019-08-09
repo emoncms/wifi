@@ -74,6 +74,8 @@ function wifi_controller()
                 $country = $_POST['country'];
             }
             $result = $wifi->setconfig(json_decode($networks),$country);
+            if ($setup_access) shell_exec('sudo shutdown -r now 2>&1');
+
         }
     }
 
