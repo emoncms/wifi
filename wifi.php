@@ -4,20 +4,20 @@ class Wifi
 {
     public function start()
     {
-        exec('sudo ifup wlan0',$return);
-        return "wlan0 started";
+        exec('sudo /sbin/ifconfig wlan0 up',$return);
+	return "wlan0 started";
     }
 
     public function stop()
     {
-        exec('sudo ifdown wlan0',$return);
-        return "wlan0 stopped";
+        exec('sudo /sbin/ifconfig wlan0 down',$return);
+	return "wlan0 stopped";
     }
 
     public function restart()
     {
-        exec('sudo ifdown wlan0',$return);
-        exec('sudo ifup wlan0',$return);
+        exec('sudo /sbin/ifconfig wlan0 down',$return);
+        exec('sudo /sbin/ifconfig wlan0 up',$return);
         return "wlan0 restarted";
     }
 
@@ -38,7 +38,7 @@ class Wifi
 
     public function scan()
     {
-        exec('sudo ifup wlan0',$return);
+        exec('sudo /sbin/ifconfig wlan0 up',$return);
         exec("sudo wpa_cli -i wlan0 scan",$return);
         sleep(3);
 
@@ -46,7 +46,7 @@ class Wifi
 
         $scan_results = "";
         exec("sudo wpa_cli -i wlan0 scan_results", $scan_results);
-  
+
         $networks = array();
         foreach($scan_results as $network) {
             if ($network!="bssid / frequency / signal level / flags / ssid") {
