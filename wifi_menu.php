@@ -1,7 +1,8 @@
 <?php
 
-    $menu['setup'][] = array(
+    $menu['sidebar']['emoncms'][] = array(
         'text' => _("WiFi"),
         'path' => 'wifi',
-        'icon' => 'wifi'
+        'icon' => 'wifi',
+        'order' => 'b6'
     );
