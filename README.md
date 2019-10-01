@@ -2,8 +2,6 @@
 
 Wifi configuration module for emoncms. Installed on emonPi pre-built SD card image 
 
-![wifi-config](http://openenergymonitor.org/emon/sites/default/files/wifi-config.png)
-
 ## Install 
 ```
   cd /var/www/emoncms/Modules
