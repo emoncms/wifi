@@ -14,7 +14,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function wifi_controller()
 {
-    global $openenergymonitor_dir, $log_location, $session, $route, $redis;
+    global $settings, $session, $route, $redis;
 
     $route->format = "json";
 
@@ -58,7 +58,7 @@ function wifi_controller()
             $route->format = "text";
             $result = $wifi->wifilog();
         } elseif ($route->action=="scan") {
-            if (file_exists("$openenergymonitor_dir/emonpi/emoncms_wifiscan.php")) {
+            if (file_exists($settings['openenergymonitor_dir']."/emonpi/emoncms_wifiscan.php")) {
                 return cmd("wifi/scan",array());
             } else {
                 $result = $wifi->scan();
@@ -84,13 +84,13 @@ function wifi_controller()
 
 
 function cmd($classmethod,$properties) {
-    global $openenergymonitor_dir, $log_location, $redis;
+    global $settings, $redis;
 
     if ($redis) {
         $redis->del($classmethod); // 1. remove last result
 
-        $update_script = "$openenergymonitor_dir/emonpi/emoncms-wifiscan.sh";
-        $update_logfile = "$log_location/wifiscan.log";
+        $update_script = $settings['openenergymonitor_dir']."/emonpi/emoncms-wifiscan.sh";
+        $update_logfile = $settings['log']['location']."/wifiscan.log";
         $redis->rpush("service-runner","$update_script>$update_logfile");
 
         $start = time(); // 3. wait for result
