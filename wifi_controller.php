@@ -68,7 +68,7 @@ function wifi_controller()
     
     if ($session["write"] || $setup_access) {
         if ($route->action=="setconfig") {
-              $networks = post('networks');
+              $networks = urldecode(post('networks'));
               $country = "GB"; 
               if (isset($_POST['country'])) {
                 $country = $_POST['country'];

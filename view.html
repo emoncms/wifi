@@ -101,7 +101,7 @@
             if (enabled) networks_to_save[z] = networks[z];
         }
     
-        $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks_to_save)+"&country="+country, dataType: 'text', async: true,
+        $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+encodeURIComponent(JSON.stringify(networks_to_save))+"&country="+country, dataType: 'text', async: true,
             success: function(data) {}
         });
     });
