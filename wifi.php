@@ -16,8 +16,11 @@ class Wifi
 
     public function restart()
     {
-        exec('sudo /sbin/ifconfig wlan0 down',$return);
-        exec('sudo /sbin/ifconfig wlan0 up',$return);
+	// This doesnt work?
+        // exec('sudo /sbin/ifconfig wlan0 down',$return);
+        // exec('sudo /sbin/ifconfig wlan0 up',$return);
+	// Replaced with (29th July 2020): 
+	exec('sudo wpa_cli -i wlan0 reconfigure',$return);
         return "wlan0 restarted";
     }
 
