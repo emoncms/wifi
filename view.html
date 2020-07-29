@@ -9,6 +9,7 @@
     <div id="networks"></div>
     <button id="wifi_save" class="btn btn-warning">Save and connect</button><br><br>
     <div class="wifi_save_alert alert alert-info hide"></div>
+    <div style="font-size:14px; color:#444"><b>Note:</b> If you are switching from one WiFi network to another, make sure to connect to the same WiFi network with your computer.<br>If the emonPi/base hostname is preserved on the new network, this page should pick it up, otherwise please check the new IP address on the emonPi LCD or use an app such as <a href="https://www.fing.com">Fing</a> to locate.</div>
     <hr>
 
     <button id="wifi_info" class="btn btn-info" style="float:right">Refresh</button>
@@ -134,6 +135,10 @@
                 }
             },
             success: function(data) {
+                if (data.success!=undefined && data.message=="Username or password empty") {
+                    window.location = "/";
+                } 
+            
                 if (wifi_save_alert) {
                     wifi_save_alert = false;
                     $(".wifi_save_alert").html("WiFi reconnected. Connection info updated below:");
