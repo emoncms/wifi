@@ -3,15 +3,12 @@
     <p>Connect emonPi / emonBase to local WiFi network.</p>
     <P>Selected country: <span id="country"></span></p>
     <button id="wifi_scan" class="btn btn-info">Scan</button>
-    
     <br><br>
+    <div class="wifi_scan_alert alert alert-info hide">Scanning for networks...</div>
     <b>Select one or more available WiFi networks:</b>
-    <div id="networks"><div class="alert-info">Scanning for networks...</div></div>
-    <div class="alert-info">Scanning for networks...</div>
-    <br>
-
-    <button id="wifi_save" class="btn btn-warning">Save and connect</button>
-     ...then click 'Refresh'
+    <div id="networks"></div>
+    <button id="wifi_save" class="btn btn-warning">Save and connect</button><br><br>
+    <div class="wifi_save_alert alert alert-info hide"></div>
     <hr>
 
     <button id="wifi_info" class="btn btn-info" style="float:right">Refresh</button>
@@ -53,6 +50,9 @@
     for (z in networks) {
         networks[z].enabled = true;
     }
+    var wifi_save_alert = false;
+    var wifi_save_timer = false;
+    
     draw_network_list();
     wifi_scan();
     wifi_info();
@@ -80,7 +80,11 @@
     });
     
     $("#wifi_save").click(function(){
-        alert("Saving config, trying to connect...please wait 60s");
+        $(".wifi_save_alert").html("Saving config and restarting WiFi interface, please wait 30s");
+        $(".wifi_save_alert").show();
+        wifi_save_timer = (new Date()).getTime();
+        
+        wifi_save_alert = true;
 
         var networks_to_save = {};
     
@@ -97,12 +101,7 @@
         }
     
         $.ajax({type: 'POST', url: "wifi/setconfig.json", data: "networks="+JSON.stringify(networks_to_save)+"&country="+country, dataType: 'text', async: true,
-            success: function(data) {
-                console.log("wifi/setconfig.json:");
-                alert("Config saved, check connection status below");
-                console.log(data);
-                wifi_info();
-            }
+            success: function(data) {}
         });
     });
     
@@ -124,7 +123,25 @@
     function wifi_info()
     {
         $.ajax({url: "wifi/info.json", dataType: 'json', async: true,
+            error: function(){
+                if (wifi_save_alert) {
+                    var time_left = 30-Math.round(((new Date()).getTime() - wifi_save_timer)*0.001);
+                    if (time_left>0) {
+                        $(".wifi_save_alert").html("Saving config and restarting WiFi interface, please wait "+time_left+"s");
+                    } else {
+                        $(".wifi_save_alert").html("Saving config and restarting WiFi interface, this seems to be taking longer than usual, try refreshing the page");
+                    }
+                }
+            },
             success: function(data) {
+                if (wifi_save_alert) {
+                    wifi_save_alert = false;
+                    $(".wifi_save_alert").html("WiFi reconnected. Connection info updated below:");
+                    setTimeout(function(){
+                        $(".wifi_save_alert").hide();
+                    },5000);
+                }
+                
                 if (data["status"]=="connected") {
                     $(".status").html("<span style='color:#00aa00'>Connected</span>");
                 } else {
@@ -141,12 +158,14 @@
                 $(".Freq").html(data["Freq"]);
                 $(".LinkQuality").html(data["LinkQuality"]);
                 $(".SignalLevel").html(data["SignalLevel"]);
-            }
+            },
+            timeout:1000
         });
     }
     
     function wifi_scan()
     {
+        $(".wifi_scan_alert").show();
         $.ajax({url: "wifi/scan.json", dataType: 'json', async: true,
             success: function(data) {
                 if (data.success!=undefined && data.message!=undefined) {
@@ -160,6 +179,7 @@
                     }
                 }
                 draw_network_list();
+                $(".wifi_scan_alert").hide();
             }
         });
     }
@@ -218,5 +238,3 @@
       });
     }
 </script>
-
-
