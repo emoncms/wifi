@@ -1,8 +1,10 @@
 <?php
-
-    $menu['sidebar']['emoncms'][] = array(
-        'text' => _("WiFi"),
-        'path' => 'wifi',
-        'icon' => 'wifi',
-        'order' => 'b6'
+global $session;
+if ($session["write"]) {
+    $menu["setup"]["l2"]['wifi'] = array(
+        "name"=>_("WiFi"),
+        "href"=>"wifi", 
+        "order"=>11, 
+        "icon"=>"wifi"
     );
+}
