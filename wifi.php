@@ -2,25 +2,33 @@
 
 class Wifi
 {
+    public function __construct()
+    {
+        $this->log = new EmonLogger(__FILE__);
+    }
+    
     public function start()
     {
+        $this->log->info("start: ifconfig wlan0 up");
         exec('sudo /sbin/ifconfig wlan0 up',$return);
-	return "wlan0 started";
+        return "wlan0 started";
     }
 
     public function stop()
     {
+        $this->log->info("stop: ifconfig wlan0 down");
         exec('sudo /sbin/ifconfig wlan0 down',$return);
-	return "wlan0 stopped";
+        return "wlan0 stopped";
     }
 
     public function restart()
     {
-	// This doesnt work?
+        // This doesnt work?
         // exec('sudo /sbin/ifconfig wlan0 down',$return);
         // exec('sudo /sbin/ifconfig wlan0 up',$return);
-	// Replaced with (29th July 2020): 
-	exec('sudo wpa_cli -i wlan0 reconfigure',$return);
+        // Replaced with (29th July 2020): 
+        $this->log->info("restart: wpa_cli wlan0 reconfigure");
+        exec('sudo wpa_cli -i wlan0 reconfigure',$return);
         return "wlan0 restarted";
     }
 
@@ -41,6 +49,7 @@ class Wifi
 
     public function scan()
     {
+        $this->log->info("scan: ifconfig wlan0 up & scan");
         exec('sudo /sbin/ifconfig wlan0 up',$return);
         exec("sudo wpa_cli -i wlan0 scan",$return);
         sleep(3);
@@ -71,6 +80,7 @@ class Wifi
 
     public function info()
     {
+        $this->log->info("fetching ifconfig iwconfig info");
         $return = "";
         exec('/sbin/ifconfig wlan0', $return);
         exec('/sbin/iwconfig wlan0', $return);
@@ -170,6 +180,7 @@ class Wifi
 
     public function getconfig()
     {
+        $this->log->info("fetching wpa_supplicant.conf");
         exec('sudo cat /etc/wpa_supplicant/wpa_supplicant.conf',$return);
         $ssid = array();
         $psk = array();
@@ -225,12 +236,17 @@ class Wifi
             }
         }
 
-        $file = fopen('/tmp/wifidata', 'w');
+        $this->log->info("Writing to wpa_supplicant.conf");
+        
+        if (!$file = fopen('/tmp/wifidata', 'w')) {
+            $this->log->error("Could not write to /tmp/wifidata");
+        }
         fwrite($file, $config);
         fclose($file);
 
         system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
-
+        $this->log->info("copy response $returnval");
+        
         if (file_exists($settings['openenergymonitor_dir']."/data/wifiAP-enabled")) {
             exec("sudo ".$settings['openenergymonitor_dir']."/emonpi/wifiAP/stopAP.sh");
         }
