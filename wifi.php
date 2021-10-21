@@ -248,7 +248,10 @@ class Wifi
         $this->log->info("copy response $returnval");
         
         if (file_exists($settings['openenergymonitor_dir']."/data/wifiAP-enabled")) {
+            $this->log->info("stopAP called");
             exec("sudo ".$settings['openenergymonitor_dir']."/emonpi/wifiAP/stopAP.sh");
+        } else {
+            $this->log->error($settings['openenergymonitor_dir']."/data/wifiAP-enabled does not exist, stopAP not called");    
         }
 
         $this->restart();
