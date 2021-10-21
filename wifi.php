@@ -225,7 +225,10 @@ class Wifi
             }
         }
 
-        exec("echo '$config' > /tmp/wifidata",$return);
+        $file = fopen('/tmp/wifidata', 'w');
+        fwrite($file, $config);
+        fclose($file);
+
         system('sudo cp /tmp/wifidata /etc/wpa_supplicant/wpa_supplicant.conf',$returnval);
 
         if (file_exists($settings['openenergymonitor_dir']."/data/wifiAP-enabled")) {
