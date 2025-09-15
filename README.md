@@ -1,4 +1,9 @@
-# Emoncms Wifi Module 
+# ARCHIVED Emoncms Wifi Module 
+
+**THIS REPO IS NOW ARCHIVED**
+See Emoncms/Network repo for latest: https://github.com/emoncms/network
+
+***
 
 Wifi configuration module for emoncms. Installed on emonPi pre-built SD card image 
 
