@@ -229,9 +229,13 @@ class Wifi
             foreach ($networks as $ssid=>$network) {
                 if (!empty($network->PSK) && (strlen($network->PSK) >= 8 && strlen($network->PSK) < 64)) {
                     $psk = hash_pbkdf2("sha1", $network->PSK, $ssid, 4096, 64);
-                    $config .= sprintf("\nnetwork={\n\tssid=\"%s\"\n\t#psk=\"%s\"\n\tpsk=%s\n}\n", $ssid, $network->PSK, $psk);
+                    // Escape special characters in SSID and PSK for wpa_supplicant.conf format
+                    $escaped_ssid = $this->escapeWpaSupplicantString($ssid);
+                    $escaped_psk = $this->escapeWpaSupplicantString($network->PSK);
+                    $config .= sprintf("\nnetwork={\n\tssid=\"%s\"\n\t#psk=\"%s\"\n\tpsk=%s\n}\n", $escaped_ssid, $escaped_psk, $psk);
                 } else {
-                    $config .= "network={\n  ssid=" . '"' . $ssid . '"' . "\n  key_mgmt=NONE\n}\n";
+                    $escaped_ssid = $this->escapeWpaSupplicantString($ssid);
+                    $config .= "network={\n  ssid=\"" . $escaped_ssid . "\"\n  key_mgmt=NONE\n}\n";
                 }
             }
         }
@@ -256,5 +260,21 @@ class Wifi
         }
         
         return $config;
+    }
+
+    /**
+     * Escape special characters for wpa_supplicant.conf string values
+     * @param string $str The string to escape
+     * @return string The escaped string
+     */
+    private function escapeWpaSupplicantString($str)
+    {
+        // Escape characters that need escaping in wpa_supplicant.conf quoted strings
+        $str = str_replace('\\', '\\\\', $str);  // Escape backslashes first
+        $str = str_replace('"', '\\"', $str);    // Escape double quotes
+        $str = str_replace("\n", '\\n', $str);   // Escape newlines
+        $str = str_replace("\r", '\\r', $str);   // Escape carriage returns
+        $str = str_replace("\t", '\\t', $str);   // Escape tabs
+        return $str;
     }
 }
